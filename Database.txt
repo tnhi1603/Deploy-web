@@ -1,0 +1,11 @@
+Database:
+	- User: id, name, email(unique), email_verified_at(nullable), password, remember_token(auto), created_at, updated_at, score, role
+	- Address: id, province, city, phone, address, user_id
+	- Watch: id, name, price, storage, slug, created_at, updated_at, category_id, gender, brand_id, description(nullable).
+	- Watch_img: watch_id, img
+	- Staff: id, name, email, password, remember_token(tự tạo), created_at, updated_at, role
+	- Carts: watch_id, user_id, quantity, created_at, update_at
+	- Orders: id, email, status, address_id, created_at, updated_at, date, total_prices, discount
+	- Order_items: id, order_id, product_id, quantity.
+	- Payments: id, order_id, created_at, updated_at, date, transaction_id
+	- 
