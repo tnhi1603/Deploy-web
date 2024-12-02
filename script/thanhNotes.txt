@@ -1,0 +1,34 @@
+task need complete:
+    ngày báo cáo : 11/12
+
+    brandstorm: - trong 2 ngày hiểu được mình cần làm gì 
+        viết dockerfile cho backend thôi
+        làm sao để kết nối frontend (đảm bảo dockerfile có các bước cài đặt dependency và build web)
+
+command run project:
+    composer install
+    cp .env.example .env
+    php artisan migrate (define Database, config database pswrd)   
+    -join in database/DatabaseSeeder.php to uncomment call function
+    php artisan db:seed 
+    after finish seeder, recomment
+    php artisan key:generate
+    php artisan serve
+frontend comment:
+    npm install
+    npm run dev
+
+
+-----------------
+phân công công việc của Nhi:
+    -Frontend Container: tạo một Dockerfile cho frontend của ứng dụng web (đảm bảo dockerfile có các bước để cài đặt dependencies và build web)
+    -Backend Container: tạo một Dockerfile cho backend của ứng dụng web (backend có kết nối với cơ sở dữ liệu trong môi trường containerized)
+    -Database Container: dung docker image cho cơ sở dữ liệu, cấu hình volume để dữ liệu không bị mất.
+    Docker compose: tệp docker-compose.yml để chạy các thành phần trong môi trường phát triển web
+-----------------
+Viết Docker Cheetsheet:
+
+----------------
+Chạy bằng Nginx
+    - Cấu hình cgi.fix_pathinfo=0 trong php.info, 
+    - chạy lệnh php-cgi.exe -b 127.0.0.1:9000
