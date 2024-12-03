@@ -1,60 +1,49 @@
-FROM php:8.1-fpm-alpine
-
-WORKDIR /var/www/html
-
-# Install PHP extensions
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod +x /usr/local/bin/install-php-extensions && sync && \
-    install-php-extensions mbstring pdo_mysql zip exif pcntl gd memcached
+# Dockerfile
+FROM php:8.2-fpm
 
 # Install system dependencies
-RUN apk add --no-cache \
-    build-base \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    unzip \
+RUN apt-get update && apt-get install -y \
     git \
     curl \
-    zlib-dev \
-    libmemcached-dev \
-    nginx \
-    nano \
-    supervisor
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nodejs \
+    npm \
+    libzip-dev  # Add libzip-dev to install PHP zip extension
+
+# Clear cache
+RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip  # Add 'zip' extension
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create non-root user
-RUN addgroup -g 1000 www && adduser -u 1000 -G www -s /bin/bash -D www
+# Set working directory
+WORKDIR /var/www/html
 
-# Copy application code
-COPY --chown=www:www-data . /var/www
+# Copy existing application directory contents
+COPY . /var/www/html
+
+# Install application dependencies
+RUN composer install
+RUN npm install
 
 # Set permissions
-RUN chmod -R ug+w /var/www/storage /var/www/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html/storage
 
-# Supervisor and custom configurations
-COPY docker/supervisor.conf /etc/supervisord.conf
-COPY docker/php.ini /usr/local/etc/php/conf.d/app.ini
-COPY docker/nginx.conf /etc/nginx/sites-enabled/default
+# COPY ./docker/php/init.sh /usr/local/bin/init.sh
+# RUN chmod +x /usr/local/bin/init.sh
 
-# Logging setup
-RUN mkdir -p /var/log/php && touch /var/log/php/errors.log && chmod 777 /var/log/php/errors.log
+# # Set the init.sh script as the entrypoint
+# ENTRYPOINT ["/usr/local/bin/init.sh"]
 
-# Production environment setup
-COPY docker/.env.production .env
+# Expose port 8000
+EXPOSE 8000
 
-# Install Composer dependencies
-RUN composer install --ignore-platform-reqs --optimize-autoloader --no-dev
-
-# Entrypoint script
-RUN chmod +x /var/www/docker/run.sh
-
-# Expose PHP-FPM port
-EXPOSE 9000
-
-ENTRYPOINT ["/var/www/docker/run.sh"]
+# Start PHP built-in server
+CMD php artisan serve --host=0.0.0.0 --port=8000

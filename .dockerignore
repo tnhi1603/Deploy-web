@@ -1,0 +1,52 @@
+# Git
+.git
+.gitignore
+
+# Docker
+docker/
+docker-compose.yml
+
+# Dependency directories
+node_modules/
+vendor/
+
+# Laravel specific
+storage/*.key
+# .env
+.env.backup
+.phpunit.result.cache
+
+# Backup files
+*.bak
+*.gzip
+*.zip
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Testing
+/tests/
+
+# Build artifacts
+/public/build/
+/public/hot
+/public/storage
