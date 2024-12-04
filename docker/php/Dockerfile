@@ -42,7 +42,6 @@ RUN chown -R www-data:www-data /var/www/html/storage
 # # Set the init.sh script as the entrypoint
 # ENTRYPOINT ["/usr/local/bin/init.sh"]
 
-# Expose port 8000
 EXPOSE 8000
 
 # Start PHP built-in server

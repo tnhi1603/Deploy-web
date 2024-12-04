@@ -22,17 +22,15 @@ Laravel is a web application framework with expressive, elegant syntax. We belie
 Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
 ### How to run
-
-1. Install Composer (https://getcomposer.org/Composer-Setup.exe for windows)
-2. clone repo
-3. run "composer install" to install all package of php, and "npm install" to install all package of nodejs
-4. copy .env.example and rename to .env and write db_password
-5. add gogle client id and secret id for login with google
-6. run "php artisan migrate" to create database
-7. run "php artisan db:seed" to import data
-8. run "php artisan key:generate" to generate app key
-9. run "php artisan serve" to run project and use another terminal to run "npm run dev"
-   Project run in port 8000
+1. copy file env va tao key:generate
+   -cp .env.example .env
+   -php artisan key:generate
+2. Build image
+   -docker-compose up --build
+3. Truy cap vao docker container de seed data vao database
+   -docker-compose exec app bash
+   -php artisan migrate
+   -php artisan db:seed
 
 ## License
 
