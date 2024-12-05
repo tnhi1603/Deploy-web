@@ -2,13 +2,11 @@ pipeline {
     agent any
 
     environment {
-        APP_ENV = 'production'
     }
 
     stages {
         stage('Setup Laravel') {
             steps {
-                sh 'cd Deploy-web'
                 sh 'composer install'
                 sh 'cp .env.example .env'
                 echo 'Setting up Laravel environment...'
@@ -43,8 +41,8 @@ pipeline {
                 echo 'Tagging and pushing Docker image to repository...'
                 // Tag và push image lên Docker Hub hoặc registry
                 sh '''
-                docker tag laravel_app:latest dockerhub-username/laravel_app:latest
-                docker push dockerhub-username/laravel_app:latest
+                docker tag laravel_app:latest nhitt/laravel_app:latest
+                docker push nhitt/laravel_app:latest
                 '''
             }
         }
