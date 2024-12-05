@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo 'Building Docker image and starting application...'
                 // Build Docker image và khởi chạy container
-                sh 'docker-compose up --build -d'
+                sh 'docker-compose up --build'
             }
         }
 
