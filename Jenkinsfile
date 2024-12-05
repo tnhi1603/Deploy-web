@@ -5,6 +5,8 @@ pipeline {
         stage('Setup Laravel') {
             steps {
                 sh 'composer install'
+                sh 'sudo apt install php-mbstring'
+                sh 'composer require cocur/slugify'
                 sh 'cp .env.example .env'
                 echo 'Setting up Laravel environment...'
                 // Generate application key
