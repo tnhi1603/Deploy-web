@@ -11,6 +11,7 @@ pipeline {
                 echo 'Cloning'
                 sh 'git clone https://github.com/tnhi1603/Deploy-web.git'
                 sh 'cd Deploy-web'
+                sh 'composer install'
                 echo 'Setting up Laravel environment...'
                 // Generate application key
                 sh 'php artisan key:generate'
