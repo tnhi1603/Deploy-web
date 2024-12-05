@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Setup Laravel') {
             steps {
-                sh 'sudo apt install php-mbstring'
                 sh 'composer require cocur/slugify'
                 sh 'composer install'
                 sh 'cp .env.example .env'
