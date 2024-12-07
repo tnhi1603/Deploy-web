@@ -1,57 +1,86 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_IMAGE = "devops"
+        DOCKER_TAG = "latest"           
+        REGISTRY = "docker.io" 
+        CONTAINER_NAME = "laravel_app"
+        DB_CONTAINER_NAME = "laravel_db"
+    }
+
     stages {
-        stage('Setup Laravel') {
+        stage('Checkout Code') {
             steps {
-                sh 'composer require cocur/slugify'
-                sh 'composer install'
-                sh 'cp .env.example .env'
-                echo 'Setting up Laravel environment...'
-                // Generate application key
-                sh 'php artisan key:generate'
+                checkout scm
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                echo 'Building Docker image and starting application...'
-                // Build Docker image và khởi chạy container
-                sh 'docker-compose up --build'
-            }
-        }
-
-        stage('Seed Database') {
-            steps {
-                echo 'Seeding database...'
-                // Chạy lệnh seed database
-                sh '''
-                docker-compose exec app bash -c "
-                php artisan migrate &&
-                php artisan db:seed
-                "
-                '''
+                script {
+                    sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
+                }
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                echo 'Tagging and pushing Docker image to repository...'
-                // Tag và push image lên Docker Hub hoặc registry
-                sh '''
-                docker tag laravel_app:latest nhitt/laravel_app:latest
-                docker push nhitt/laravel_app:latest
-                '''
+                script {
+                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD $REGISTRY"
+                    sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
+                    sh "docker push $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
+                }
+            }
+        }
+
+        stage('Deploy Application') {
+            steps {
+                script {
+                    // Start Database Container
+                    sh """
+                        docker run -d --name $DB_CONTAINER_NAME -p 3307:3306 \\
+                            -e MYSQL_ROOT_PASSWORD=root \\
+                            -e MYSQL_DATABASE=laravel \\
+                            -e MYSQL_USER=laravel \\
+                            -e MYSQL_PASSWORD=secret \\
+                            mysql:5.7
+                    """
+
+                    // Start Laravel App Container
+                    sh """
+                        docker run -d --name $CONTAINER_NAME -p 8000:8000 \\
+                            --env-file .env \\
+                            $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
+                    """
+                }
+            }
+        }
+
+        stage('Seed Database') {
+            steps {
+                script {
+                    // Copy `.env.example` to `.env` and run key:generate
+                    sh "docker exec $CONTAINER_NAME cp .env.example .env"
+                    sh "docker exec $CONTAINER_NAME php artisan key:generate"
+
+                    // Migrate and seed the database
+                    sh "docker exec $CONTAINER_NAME php artisan migrate"
+                    sh "docker exec $CONTAINER_NAME php artisan db:seed"
+                }
             }
         }
     }
 
     post {
+        always {
+            echo 'Pipeline execution complete.'
+        }
         success {
-            echo 'Deployment succeeded!'
+            echo 'Pipeline executed successfully.'
         }
         failure {
-            echo 'Deployment failed!'
+            echo 'Pipeline failed.'
         }
     }
 }
