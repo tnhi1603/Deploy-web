@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_IMAGE = "devops"
         DOCKER_TAG = "latest"           
-        REGISTRY = "nhitt" 
         CONTAINER_NAME = "laravel_app"
         DB_CONTAINER_NAME = "laravel_db"
     }
@@ -18,17 +17,16 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh "docker build -t $DOCKER_IMAGE:$DOCKER_TAG ."
-                }
+                sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
             }
         }
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
-                    sh "docker push $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]){
+                    sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
+                    sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:$DOCKER_TAG"
+                    sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
                 }
             }
         }
@@ -50,7 +48,7 @@ pipeline {
                     sh """
                         docker run -d --name $CONTAINER_NAME -p 8000:8000 \\
                             --env-file .env \\
-                            $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
+                            $DOCKER_IMAGE:$DOCKER_TAG
                     """
                 }
             }
