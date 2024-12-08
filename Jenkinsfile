@@ -15,7 +15,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    sh "docker-compose build"
+                    sh "docker compose build"
                 }
             }
         }
@@ -37,15 +37,15 @@ pipeline {
                     sh "docker pull ${DOCKER_IMAGE_NAME}:latest"
 
                     // Run the application
-                    sh "docker-compose down"
-                    sh "docker-compose up -d"
+                    sh "docker compose down"
+                    sh "docker compose up -d"
 
                     // Wait for the application to initialize
                     sh "sleep 30"
 
                     // Run migrations and seed data
-                    sh "docker-compose exec app php artisan migrate"
-                    sh "docker-compose exec app php artisan db:seed"
+                    sh "docker compose exec app php artisan migrate"
+                    sh "docker compose exec app php artisan db:seed"
 
                     // Test if the application is accessible
                     sh "curl -f http://localhost:${APP_PORT} || exit 1"
