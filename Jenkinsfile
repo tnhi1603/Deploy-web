@@ -28,7 +28,6 @@ pipeline {
                         sh "docker push ${DOCKER_IMAGE_NAME}:latest"
                     }
                 }
-            }
         }
 
         stage('Deploy, Seed, and Test') {
@@ -64,3 +63,4 @@ pipeline {
             echo "Pipeline failed. Check logs for details."
         }
     }
+}
