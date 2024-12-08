@@ -39,6 +39,7 @@ pipeline {
                     // Run the application
                     sh "docker compose down"
                     sh "cp .env.example .env"
+                    sh "composer install"
                     sh "php artisan key:generate"
                     sh "docker compose up -d"
 
