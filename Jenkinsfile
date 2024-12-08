@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "devops"
-        DOCKER_TAG = "latest"           
-        CONTAINER_NAME = "laravel_app"
-        DB_CONTAINER_NAME = "laravel_db"
+        DOCKER_IMAGE_NAME = "nhitt/devops"
+        DOCKER_CREDENTIALS_ID = "docker-hub-credentials"
+        APP_PORT = "8000" 
     }
 
     stages {
@@ -17,67 +16,54 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $DOCKER_IMAGE:$DOCKER_TAG .'
-            }
-        }
-
-        stage('Push Docker Image') {
-            steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDS}", passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]){
-                    sh "echo \$DOCKER_PASSWORD | docker login -u \$DOCKER_USERNAME --password-stdin docker.io"
-                    sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $DOCKER_IMAGE:$DOCKER_TAG"
-                    sh "docker push $DOCKER_IMAGE:$DOCKER_TAG"
+                script {
+                    sh "docker-compose build"
                 }
             }
         }
 
-        stage('Deploy Application') {
+        stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Start Database Container
-                    sh """
-                        docker run -d --name $DB_CONTAINER_NAME -p 3307:3306 \\
-                            -e MYSQL_ROOT_PASSWORD=root \\
-                            -e MYSQL_DATABASE=laravel \\
-                            -e MYSQL_USER=laravel \\
-                            -e MYSQL_PASSWORD=secret \\
-                            mysql:5.7
-                    """
-
-                    // Start Laravel App Container
-                    sh """
-                        docker run -d --name $CONTAINER_NAME -p 8000:8000 \\
-                            --env-file .env \\
-                            $DOCKER_IMAGE:$DOCKER_TAG
-                    """
+                    docker.withRegistry('', DOCKER_CREDENTIALS_ID) {
+                        sh "docker tag laravel-app ${DOCKER_IMAGE_NAME}:latest"
+                        sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                    }
                 }
             }
         }
 
-        stage('Seed Database') {
+        stage('Deploy, Seed, and Test') {
             steps {
                 script {
-                    // Copy `.env.example` to `.env` and run key:generate
-                    sh "docker exec $CONTAINER_NAME cp .env.example .env"
-                    sh "docker exec $CONTAINER_NAME php artisan key:generate"
+                    // Pull the Docker image
+                    sh "docker pull ${DOCKER_IMAGE_NAME}:latest"
 
-                    // Migrate and seed the database
-                    sh "docker exec $CONTAINER_NAME php artisan migrate"
-                    sh "docker exec $CONTAINER_NAME php artisan db:seed"
+                    // Run the application
+                    sh "docker-compose down"
+                    sh "docker-compose up -d"
+
+                    // Wait for the application to initialize
+                    sh "sleep 30"
+
+                    // Run migrations and seed data
+                    sh "docker-compose exec app php artisan migrate"
+                    sh "docker-compose exec app php artisan db:seed"
+
+                    // Test if the application is accessible
+                    sh "curl -f http://localhost:${APP_PORT} || exit 1"
                 }
             }
         }
     }
 
     post {
-        always {
-            echo 'Pipeline execution complete.'
-        }
         success {
-            echo 'Pipeline executed successfully.'
+            echo "Application successfully built, pushed, and tested!"
         }
+
         failure {
-            echo 'Pipeline failed.'
+            echo "Pipeline failed. Check logs for details."
         }
     }
 }
