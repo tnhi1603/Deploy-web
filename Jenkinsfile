@@ -27,7 +27,6 @@ pipeline {
         stage('Push Docker Image') {
             steps {
                 script {
-                    sh "docker login -u \$DOCKER_USERNAME -p \$DOCKER_PASSWORD $REGISTRY"
                     sh "docker tag $DOCKER_IMAGE:$DOCKER_TAG $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
                     sh "docker push $REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG"
                 }
