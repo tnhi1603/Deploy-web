@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "devops"
         DOCKER_TAG = "latest"           
-        REGISTRY = "docker.io" 
+        REGISTRY = "nhitt" 
         CONTAINER_NAME = "laravel_app"
         DB_CONTAINER_NAME = "laravel_db"
     }
