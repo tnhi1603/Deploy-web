@@ -16,7 +16,7 @@ pipeline {
         stage('Analyze with SonarQube') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarqubeServer') {
+                    withSonarQubeEnv('sonarqube') {
                         sh '''sonar-scanner \ 
                            -Dsonar.projectKey=devops \ 
                            -Dsonar.sources=. \ 
