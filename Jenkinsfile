@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         APP_PORT = "8000" 
-        SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
