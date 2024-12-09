@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         APP_PORT = "8000" 
+        sonartoken = credentials('sonar-token')
     }
 
     stages {
@@ -12,12 +13,18 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Analyze with SonarQube') {
             steps {
-            def scannerHome = tool 'sonarqube';
-            withSonarQubeEnv() {
-                sh "${scannerHome}/bin/sonar-scanner"
-            }
+                script {
+                    def scannerHome = tool name: 'SonarQubeScanner'
+                    withSonarQubeEnv('sonarqube') { 
+                        sh "${scannerHome}/bin/sonar-scanner \
+                           -Dsonar.projectKey=devops \
+                           -Dsonar.sources=. \
+                           -Dsonar.host.url=http://3.107.86.187 \
+                           -Dsonar.login= $sonartoken"
+                    }
+                }
             }
         }
 
