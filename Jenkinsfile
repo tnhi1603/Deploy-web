@@ -48,8 +48,8 @@ pipeline {
                     sh "sleep 30"
 
                     // Run migrations and seed data
-                    // sh "docker compose exec app php artisan migrate"
-                    // sh "docker compose exec app php artisan db:seed"
+                    sh "docker compose exec app php artisan migrate"
+                    sh "docker compose exec app php artisan db:seed"
 
                     // Test if the application is accessible
                     sh "curl -f http://localhost:${APP_PORT} || exit 1"
