@@ -13,20 +13,6 @@ pipeline {
             }
         }
 
-        stage('Analyze with SonarQube') {
-            steps {
-                script {
-                    withSonarQubeEnv('sonarqube') {
-                        sh """sonar-scanner \ 
-                           -Dsonar.projectKey=devops \ 
-                           -Dsonar.sources=. \ 
-                           -Dsonar.host.url=http://3.107.86.187:9000 \ 
-                           -Dsonar.login= $SONAR_TOKEN"""
-                    }
-                }
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
