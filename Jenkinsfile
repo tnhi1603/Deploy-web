@@ -2,8 +2,7 @@ pipeline {
     agent any
 
     environment {
-        APP_PORT = "8000" 
-        sonartoken = credentials('sonar-token')
+        APP_PORT = "8000"
     }
 
     stages {
@@ -15,6 +14,7 @@ pipeline {
 
         stage('Analyze with SonarQube') {
             steps {
+                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
                 script {
                     def scannerHome = tool name: 'sonarqube'
                     withSonarQubeEnv('sonarqube') { 
@@ -22,8 +22,9 @@ pipeline {
                            -Dsonar.projectKey=devops \
                            -Dsonar.sources=. \
                            -Dsonar.host.url=http://3.107.86.187 \
-                           -Dsonar.login= $sonartoken"
+                           -Dsonar.login= $SONAR_TOKEN"
                     }
+                }
                 }
             }
         }
