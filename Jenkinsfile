@@ -3,12 +3,27 @@ pipeline {
 
     environment {
         APP_PORT = "8000" 
+        SONAR_TOKEN = credentials('sonar-token')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Analyze with SonarQube') {
+            steps {
+                script {
+                    withSonarQubeEnv('SonarQubeServer') {
+                        sh "sonar-scanner \ 
+                           -Dsonar.projectKey=devops \ 
+                           -Dsonar.sources=. \ 
+                           -Dsonar.host.url=http://3.107.86.187:9000 \ 
+                           -Dsonar.login= $SONAR_TOKEN"
+                    }
+                }
             }
         }
 
@@ -66,4 +81,4 @@ pipeline {
             echo "Pipeline failed. Check logs for details."
         }
     }
-}//
+}
