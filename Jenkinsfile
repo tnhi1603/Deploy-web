@@ -18,11 +18,11 @@ pipeline {
                 script {
                     def scannerHome = tool name: 'sonarqube', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                     withSonarQubeEnv('sonarqube') { 
-                        sh '''${scannerHome}/bin/sonarqube \
+                        sh "${scannerHome}/bin/sonarqube \
                            -Dsonar.projectKey=devops \
                            -Dsonar.sources=. \
                            -Dsonar.host.url=http://3.107.86.187 \
-                           -Dsonar.login= ${SONAR_TOKEN}'''
+                           -Dsonar.login= ${SONAR_TOKEN}"
                     }
                 }
                 }
