@@ -16,12 +16,12 @@ pipeline {
         stage('Analyze with SonarQube') {
             steps {
                 script {
-                    withSonarQubeEnv('SonarQubeServer') {
-                        sh "sonar-scanner \ 
+                    withSonarQubeEnv('SonarqubeServer') {
+                        sh '''sonar-scanner \ 
                            -Dsonar.projectKey=devops \ 
                            -Dsonar.sources=. \ 
                            -Dsonar.host.url=http://3.107.86.187:9000 \ 
-                           -Dsonar.login= $SONAR_TOKEN"
+                           -Dsonar.login= $SONAR_TOKEN'''
                     }
                 }
             }
